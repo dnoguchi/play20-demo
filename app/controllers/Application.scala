@@ -6,11 +6,6 @@ import play.api.libs.iteratee.Enumerator
 
 object Application extends Controller {
 
-  def index = Action {
-    // リクエストを参照しない。
-    Ok("Hello world")
-  }
-
   def echo = Action { request =>
     Ok("Got request [" + request + "]")
     // http://localhost:9000/echo?msg=hello
@@ -25,8 +20,15 @@ object Application extends Controller {
 
   def hello(name: String) = Action {
     Ok("Hello " + name)
-    // http://localhost:9000/hello?name=hoge
+    // http://localhost:9000/hello/hoge
     // => Hello hoge
+  }
+
+  def helloBob = Action {
+    Redirect(controllers.routes.Application.hello("Bob"))
+    // http://localhost:9000/bob
+    // => Redirect to http://localhost:9000/hello/Bob
+    // => Hello Bob
   }
 
   def simpleResult = Action {
@@ -45,4 +47,23 @@ object Application extends Controller {
     Redirect("http://www.google.co.jp")
   }
 
+  // 可変長引数にしなくてよい。
+  def download(name: String) = Action {
+    Ok("name: %s".format(name))
+    // http://localhost:9000/files/images/logo.png
+    // => name: images/logo.png
+  }
+
+  def show(page: String) = Action {
+    dummy(page).map { htmlContent =>
+      Ok(htmlContent).as("text/html")
+    }.getOrElse(NotFound)
+  }
+
+  private def dummy(page: String) = {
+    page match {
+      case "none" => None
+      case _ => Option(<h2>{page}</h2>)
+    }
+  }
 }
