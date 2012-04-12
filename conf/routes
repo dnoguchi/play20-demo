@@ -9,10 +9,16 @@ GET     /echo                       controllers.Application.echo
 GET     /echo2                      controllers.Application.echo2
 GET     /hello/:name                controllers.Application.hello(name)
 GET     /bob                        controllers.Application.helloBob
+GET     /h                          controllers.Application.helloWorld
 GET     /simpleResult               controllers.Application.simpleResult
 GET     /todo                       controllers.Application.todo
 GET     /redirect                   controllers.Application.redirect
 GET     /files/*name                controllers.Application.download(name)
+
+GET     /iso                        controllers.Application.iso
+GET     /sjis                       controllers.Application.sjis
+GET     /eucjp                      controllers.Application.eucjp
+
 
 # Display a clients.
 GET     /clients                    controllers.Clients.list(page: Int ?= 1)

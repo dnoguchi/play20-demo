@@ -6,6 +6,9 @@ import play.api.libs.iteratee.Enumerator
 
 object Application extends Controller {
 
+  // play.api.mvc.Codec
+  implicit val myCustomCharset = Codec.javaSupported("iso-8859-1")
+
   def echo = Action { request =>
     Ok("Got request [" + request + "]")
     // http://localhost:9000/echo?msg=hello
@@ -29,6 +32,13 @@ object Application extends Controller {
     // http://localhost:9000/bob
     // => Redirect to http://localhost:9000/hello/Bob
     // => Hello Bob
+  }
+
+  def helloWorld = Action {
+    Ok("Hello world").withHeaders(
+      CACHE_CONTROL -> "max-age=3600",
+      ETAG -> "xx"
+    ).withCookies(Cookie("theme", "blue"))
   }
 
   def simpleResult = Action {
@@ -58,6 +68,22 @@ object Application extends Controller {
     dummy(page).map { htmlContent =>
       Ok(htmlContent).as("text/html")
     }.getOrElse(NotFound)
+  }
+
+  def iso = Action {
+    // 暗黙的パラメータに myCustomCharset が使用される。
+    // HTML(Codec.iso_8859_1) も可能。
+    Ok("iso-8859-1 サンプル").as(HTML)
+  }
+
+  def sjis = Action {
+    // レスポンスヘッダーは変更されているけど，文字化ける?
+    Ok("Shift_JIS サンプル").as(HTML(Codec.javaSupported("Shift_JIS")))
+  }
+
+  def eucjp = Action {
+    // レスポンスヘッダーは変更されているけど，文字化ける?
+    Ok("EUC_JP サンプル").as(HTML(Codec.javaSupported("EUC_JP")))
   }
 
   private def dummy(page: String) = {
