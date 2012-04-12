@@ -21,14 +21,16 @@ object Application extends Controller {
     Ok("Got request [" + request + "]")
   }
 
-  def hello(name: String) = Action {
-    Ok("Hello " + name)
+  def hello(name: String) = Action { implicit request =>
+    Ok("Hello " + name + " " + flash.get("success").getOrElse("Welcome!"))
     // http://localhost:9000/hello/hoge
     // => Hello hoge
   }
 
   def helloBob = Action {
-    Redirect(controllers.routes.Application.hello("Bob"))
+    Redirect(controllers.routes.Application.hello("Bob")).flashing(
+      "success" -> "Redirect OK"
+    )
     // http://localhost:9000/bob
     // => Redirect to http://localhost:9000/hello/Bob
     // => Hello Bob
