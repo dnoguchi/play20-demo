@@ -9,6 +9,20 @@ object Application extends Controller {
   // play.api.mvc.Codec
   implicit val myCustomCharset = Codec.javaSupported("iso-8859-1")
 
+  def LoggingAction[A](bp: BodyParser[A])(f: Request[A] => Result): Action[A] = {
+    Action(bp) { request =>
+      Logger.info("Calling action")
+      f(request)
+    }
+  }
+  
+  def LoggingMethod[A](action: Action[A]): Action[A] = {
+    Action(action.parser) { request =>
+      Logger.info("Calling action 3")
+      action(request)
+    }
+  }
+
   def echo = Action { request =>
     Ok("Got request [" + request + "]")
     // http://localhost:9000/echo?msg=hello
@@ -21,7 +35,7 @@ object Application extends Controller {
     Ok("Got request [" + request + "]")
   }
 
-  def hello(name: String) = Action { implicit request =>
+  def hello(name: String) = LoggingAction(parse.anyContent) { implicit request =>
     Ok("Hello " + name + " " + flash.get("success").getOrElse("Welcome!"))
     // http://localhost:9000/hello/hoge
     // => Hello hoge
@@ -36,22 +50,26 @@ object Application extends Controller {
     // => Hello Bob
   }
 
-  def helloWorld = Action {
-    Ok("Hello world").withHeaders(
-      CACHE_CONTROL -> "max-age=3600",
-      ETAG -> "xx"
-    ).withCookies(Cookie("theme", "blue"))
+  def helloWorld = Logging {
+    Action {
+      Ok("Hello world").withHeaders(
+        CACHE_CONTROL -> "max-age=3600",
+        ETAG -> "xx"
+      ).withCookies(Cookie("theme", "blue"))
+    }
   }
 
-  def simpleResult = Action {
-    // play.api.mvc.SimpleResult
-    SimpleResult(
-      header = ResponseHeader(200, Map(CONTENT_TYPE -> "text/plain")),
-      // import play.api.libs.iteratee.Enumerator が必要。
-      body = Enumerator("Hello world!")
-    )
+  def simpleResult = LoggingMethod {
+    Action {
+      // play.api.mvc.SimpleResult
+      SimpleResult(
+        header = ResponseHeader(200, Map(CONTENT_TYPE -> "text/plain")),
+        // import play.api.libs.iteratee.Enumerator が必要。
+        body = Enumerator("Hello world!")
+      )
+    }
   }
-
+  
   // 実装予定のアクションを TODO にしておく。
   def todo = TODO
 
@@ -75,7 +93,7 @@ object Application extends Controller {
   def save = Action(parse.text) { request =>
     Ok("Got: " + request.body)
   }
-  
+
   def iso = Action {
     // 暗黙的パラメータに myCustomCharset が使用される。
     // HTML(Codec.iso_8859_1) も可能。
@@ -99,4 +117,14 @@ object Application extends Controller {
     }
   }
 
+}
+
+case class Logging[A](action: Action[A]) extends Action[A] {
+  
+  def apply(request: Request[A]): Result = {
+    Logger.info("Calling action 2")
+    action(request)
+  }
+  
+  lazy val parser = action.parser
 }
