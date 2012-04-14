@@ -14,6 +14,7 @@ GET     /simpleResult               controllers.Application.simpleResult
 GET     /todo                       controllers.Application.todo
 GET     /redirect                   controllers.Application.redirect
 GET     /files/*name                controllers.Application.download(name)
+GET     /save                       controllers.Application.save
 
 GET     /iso                        controllers.Application.iso
 GET     /sjis                       controllers.Application.sjis

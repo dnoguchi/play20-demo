@@ -72,6 +72,10 @@ object Application extends Controller {
     }.getOrElse(NotFound)
   }
 
+  def save = Action(parse.text) { request =>
+    Ok("Got: " + request.body)
+  }
+  
   def iso = Action {
     // 暗黙的パラメータに myCustomCharset が使用される。
     // HTML(Codec.iso_8859_1) も可能。
@@ -94,4 +98,5 @@ object Application extends Controller {
       case _ => Option(<h2>{page}</h2>)
     }
   }
+
 }
